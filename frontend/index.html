@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexa — Grupos de Estudo</title>
+  <link rel="stylesheet" href="/frontend/css/style.css" />
+  <link rel="preconnect" href="[fonts.googleapis.com](https://fonts.googleapis.com)" />
+  <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap)" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar" id="navbar">
+    <a href="#" class="nav-logo" onclick="showPage('home')">
+      🎓 <span>Connexa</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="#" onclick="showPage('home')">Início</a>
+      <a href="#" onclick="showPage('groups')">Grupos</a>
+      <!-- Autenticado -->
+      <span id="navAuth" style="display:none">
+        <a href="#" onclick="showPage('myGroups')">Meus Grupos</a>
+        <a href="#" onclick="showPage('createGroup')">+ Novo Grupo</a>
+        <span class="nav-user" id="navUserName"></span>
+        <button class="btn btn-outline btn-sm" onclick="logout()">Sair</button>
+      </span>
+      <!-- Não autenticado -->
+      <span id="navGuest">
+        <button class="btn btn-outline btn-sm" onclick="showPage('login')">Entrar</button>
+        <button class="btn btn-primary btn-sm" onclick="showPage('register')">Cadastrar</button>
+      </span>
+    </div>
+  </nav>
+
+  <!-- ===== TOAST ===== -->
+  <div id="toast" class="toast"></div>
+
+  <!-- ===== MODAL DE DETALHES DO GRUPO ===== -->
+  <div id="groupModal" class="modal-overlay" style="display:none" onclick="closeModal(event)">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeGroupModal()">✕</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- ===== PÁGINAS ===== -->
+  <main id="app">
+
+    <!-- HOME -->
+    <div id="page-home" class="page active">
+      <section class="hero">
+        <div class="hero-content">
+          <h1>Encontre seu grupo de estudo ideal 🎓</h1>
+          <p>Conecte-se com colegas universitários, forme grupos, estude melhor.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary btn-lg" onclick="showPage('groups')">Explorar Grupos</button>
+            <button class="btn btn-outline btn-lg" id="heroCTA" onclick="showPage('register')">Criar Conta</button>
+          </div>
+        </div>
+        <div class="hero-illustration">📚</div>
+      </section>
+
+      <section class="features">
+        <div class="feature-card">🔍<h3>Encontre grupos</h3><p>Busque por matéria, local ou disponibilidade.</p></div>
+        <div class="feature-card">👥<h3>Estude junto</h3><p>Forme grupos presenciais ou online.</p></div>
+        <div class="feature-card">🚀<h3>Evolua mais rápido</h3><p>Aprendizado colaborativo é mais eficiente.</p></div>
+      </section>
+    </div>
+
+    <!-- CADASTRO -->
+    <div id="page-register" class="page">
+      <div class="auth-container">
+        <div class="auth-card">
+          <h2>Criar conta</h2>
+          <p class="auth-sub">Junte-se à Connexa e encontre seu grupo ideal.</p>
+          <form id="registerForm" onsubmit="handleRegister(event)">
+            <div class="form-group">
+              <label>Nome completo *</label>
+              <input type="text" id="reg-name" placeholder="Seu nome" required />
+            </div>
+            <div class="form-group">
+              <label>E-mail universitário *</label>
+              <input type="email" id="reg-email" placeholder="seu@email.com" required />
+            </div>
+            <div class="form-group">
+              <label>Senha *</label>
+              <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" minlength="6" required />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Universidade</label>
+                <input type="text" id="reg-university" placeholder="Ex.: USP" />
+              </div>
+              <div class="form-group">
+                <label>Curso</label>
+                <input type="text" id="reg-course" placeholder="Ex.: Ciência da Computação" />
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" id="registerBtn">Criar conta</button>
+          </form>
+          <p class="auth-switch">Já tem conta? <a href="#" onclick="showPage('login')">Faça login</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="page-login" class="page">
+      <div class="auth-container">
+        <div class="auth-card">
+          <h2>Entrar</h2>
+          <p class="auth-sub">Acesse sua conta Connexa.</p>
+          <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+              <label>E-mail</label>
+              <input type="email" id="login-email" placeholder="seu@email.com" required />
+            </div>
+            <div class="form-group">
+              <label>Senha</label>
+              <input type="password" id="login-password" placeholder="Sua senha" required />
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" id="loginBtn">Entrar</button>
+          </form>
+          <p class="auth-switch">Não tem conta? <a href="#" onclick="showPage('register')">Cadastre-se</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPLORAR GRUPOS -->
+    <div id="page-groups" class="page">
+      <div class="page-container">
+        <div class="page-header">
+          <h2>Explorar grupos</h2>
+          <button class="btn btn-primary" id="newGroupBtnHeader" onclick="requireAuthAction('createGroup')" style="display:none">
+            + Novo Grupo
+          </button>
+        </div>
+
+        <!-- Busca e filtros -->
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="Buscar por matéria, nome ou descrição..." />
+          <button class="btn btn-primary" onclick="searchGroups()">Buscar</button>
+        </div>
+        <div class="filters">
+          <label class="filter-label">Local:</label>
+          <select id="filterLocation">
+            <option value="">Todos</option>
+            <option value="online">Online</option>
+            <option value="presencial">Presencial</option>
+          </select>
+          <label class="filter-label">Vagas:</label>
+          <select id="filterAvailable">
+            <option value="">Todos</option>
+            <option value="true">Com vagas disponíveis</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="clearFilters()">Limpar filtros</button>
+        </div>
+
+        <div id="groupsList" class="groups-grid"></div>
+      </div>
+    </div>
+
+    <!-- CRIAR GRUPO -->
+    <div id="page-createGroup" class="page">
+      <div class="page-container narrow">
+        <h2>Criar novo grupo</h2>
+        <form id="createGroupForm" onsubmit="handleCreateGroup(event)" class="card form-card">
+          <div class="form-group">
+            <label>Nome do grupo *</label>
+            <input type="text" id="grp-name" placeholder="Ex.: Cálculo 2 — Turma A" required />
+          </div>
+          <div class="form-group">
+            <label>Matéria *</label>
+            <input type="text" id="grp-subject" placeholder="Ex.: Cálculo II" required />
+          </div>
+          <div class="form-group">
+            <label>Objetivo / Descrição *</label>
+            <textarea id="grp-description" rows="4"
+              placeholder="Descreva o objetivo do grupo, metodologia, horários sugeridos..." required></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Local *</label>
+              <select id="grp-location" required>
+                <option value="">Selecione...</option>
+                <option value="online">Online</option>
+                <option value="presencial">Presencial</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Limite de participantes *</label>
+              <input type="number" id="grp-max" min="2" max="100" value="10" required />
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" onclick="showPage('groups')">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="createGroupBtn">Criar grupo</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MEUS GRUPOS -->
+    <div id="page-myGroups" class="page">
+      <div class="page-container">
+        <div class="page-header">
+          <h2>Meus grupos</h2>
+          <button class="btn btn-primary" onclick="showPage('createGroup')">+ Novo Grupo</button>
+        </div>
+        <div id="myGroupsList" class="groups-grid"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
