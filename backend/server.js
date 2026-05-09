@@ -10,9 +10,9 @@ app.use(express.json());
 // Serve o frontend estático
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
-// Rotas da API
-app.use('/api/auth',   require('./src/routes/authRoutes'));
-app.use('/api/groups', require('./src/routes/groupRoutes'));
+// Rotas da API  (pasta correta: scr — não src)
+app.use('/api/auth',   require('./scr/routes/authRoutes'));
+app.use('/api/groups', require('./scr/routes/groupRoutes'));
 
 // Fallback: qualquer rota não-API devolve o index.html
 app.get(/^(?!\/api).*/, (req, res) => {

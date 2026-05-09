@@ -19,15 +19,6 @@ const AuthController = {
     }
   },
 
-  verifyEmail(req, res) {
-    try {
-      const result = AuthService.verifyEmail(req.params.token);
-      res.json(result);
-    } catch (err) {
-      res.status(400).json({ error: err.message });
-    }
-  },
-
   getMe(req, res) {
     res.json({ user: req.user });
   },
