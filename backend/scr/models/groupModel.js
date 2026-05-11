@@ -15,32 +15,23 @@ const BASE_SELECT = `
 
 const GroupModel = {
   // Cria grupo e adiciona o admin como primeiro membro (transação)
-  async create({ id, name, subject, description, location, max_members, admin_id }) {
-    const conn = await pool.getConnection();
-    try {
-      await conn.beginTransaction();
+async create({ id, name, subject, description, location, max_members, admin_id }) {
 
-      await conn.execute(
-        `INSERT INTO \`groups\` (id, name, subject, description, location, max_members, admin_id)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [id, name, subject, description, location, max_members, admin_id]
-      );
+  await pool.execute(
+    `INSERT INTO groups
+    (id, name, subject, description, location, max_members, admin_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [id, name, subject, description, location, max_members, admin_id]
+  );
 
-      await conn.execute(
-        'INSERT INTO group_members (group_id, user_id) VALUES (?, ?)',
-        [id, admin_id]
-      );
+  await pool.execute(
+    `INSERT INTO group_members (group_id, user_id)
+     VALUES (?, ?)`,
+    [id, admin_id]
+  );
 
-      await conn.commit();
-    } catch (err) {
-      await conn.rollback();
-      throw err;
-    } finally {
-      conn.release();
-    }
-
-    return this.findById(id);
-  },
+  return this.findById(id);
+},
 
   async findById(id) {
     const [rows] = await pool.execute(

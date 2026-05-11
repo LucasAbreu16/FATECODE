@@ -26,7 +26,7 @@ function updateNavbar() {
   if (isLoggedIn()) {
     authEl.style.display  = 'contents';
     guestEl.style.display = 'none';
-    nameEl.textContent    = `👋 ${currentUser.name.split(' ')[0]}`;
+    nameEl.textContent    = `${currentUser.name.split(' ')[0]}`;
     if (heroCTA) { heroCTA.textContent = '+ Criar Grupo'; heroCTA.onclick = () => showPage('createGroup'); }
     if (newBtn)  newBtn.style.display = 'inline-flex';
   } else {
