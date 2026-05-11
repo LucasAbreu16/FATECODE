@@ -126,18 +126,19 @@ const GroupModel = {
   async getUserGroups(userId) {
     const [rows] = await pool.execute(
       `SELECT
-         g.id, g.name, g.subject, g.description, g.location,
-         g.max_members, g.admin_id, g.created_at,
-         u.name AS admin_name,
-         COUNT(gm2.user_id) AS member_count,
-         (g.max_members - COUNT(gm2.user_id)) AS available_slots
+          g.id, g.name, g.subject, g.description, g.location,
+          g.max_members, g.admin_id, g.created_at,
+          u.name AS admin_name,
+          COUNT(gm2.user_id) AS member_count,
+          (g.max_members - COUNT(gm2.user_id)) AS available_slots
        FROM group_members gm
        JOIN \`groups\` g        ON g.id  = gm.group_id
        LEFT JOIN group_members gm2 ON gm2.group_id = g.id
        LEFT JOIN users u        ON g.admin_id = u.id
        WHERE gm.user_id = ?
        GROUP BY g.id, g.name, g.subject, g.description,
-                g.location, g.max_members, g.admin_id, g.created_at, u.name
+                g.location, g.max_members, g.admin_id, g.created_at, u.name,
+                gm.joined_at -- ADICIONE ESSA LINHA AQUI
        ORDER BY gm.joined_at DESC`,
       [userId]
     );
